@@ -1,11 +1,14 @@
 build: server client
 
 server: clean
-	GOOS=linux GOARCH=amd64 go build server.go
+	GOOS=linux GOARCH=amd64 go build -trimpath server.go
 	zip server.zip server
 
 client: clean
-	go build client.go
+	go build -trimpath client.go
+
+fmt:
+	go fmt ./...
 
 clean:
 	-rm server client

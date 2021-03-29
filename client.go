@@ -21,7 +21,7 @@ import (
 )
 
 var (
-	api = flag.String("api", "", "API URL")
+	api  = flag.String("api", "", "API URL")
 	port = flag.Int("port", 8080, "listen sockets port")
 )
 
@@ -63,6 +63,7 @@ func main() {
 	signal.Notify(sigCh, syscall.SIGINT, syscall.SIGTERM)
 	<-sigCh
 }
+
 type T struct {
 	martian.RequestModifier
 }
