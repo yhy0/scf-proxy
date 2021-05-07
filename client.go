@@ -1,7 +1,6 @@
 package main
 
 import (
-	"crypto/tls"
 	"encoding/base64"
 	"flag"
 	"fmt"
@@ -22,11 +21,11 @@ import (
 
 var (
 	api  = flag.String("api", "", "API URL")
-	port = flag.Int("port", 8080, "listen sockets port")
+	port = flag.Int("port", 8888, "listen http port")
 )
 
 func init() {
-	martianLog.SetLevel(martianLog.Debug)
+	martianLog.SetLevel(martianLog.Error)
 	flag.Parse()
 }
 
@@ -34,22 +33,14 @@ func main() {
 	p := martian.NewProxy()
 	defer p.Close()
 
-	tr := &http.Transport{
-		MaxIdleConnsPerHost: -1,
-		TLSClientConfig: &tls.Config{
-			InsecureSkipVerify: true,
-		},
-		DisableKeepAlives: true,
-	}
-	p.SetRoundTripper(tr)
 	ca, privateKey, _ := mitm.NewAuthority("name", "org", 24*365*time.Hour)
 	conf, _ := mitm.NewConfig(ca, privateKey)
 	p.SetMITM(conf)
 
-	proxy, _ := url.Parse("http://localhost:8080")
-	p.SetDownstreamProxy(proxy)
+	//proxy, _ := url.Parse("http://localhost:8080")
+	//p.SetDownstreamProxy(proxy)
 
-	l, err := net.Listen("tcp", fmt.Sprintf(":%d", *port))
+	l, err := net.Listen("tcp", fmt.Sprintf("localhost:%d", *port))
 	if err != nil {
 		log.Fatal(err)
 	}
