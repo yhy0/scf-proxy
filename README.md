@@ -16,10 +16,6 @@ SCF代理
 
 执行
 ```bash
-./client -api <API_URL> -port <PORT>
+./client -port <PORT> <API1> <API2> ... # API1，API2...等等，意思支持多个地区API随机轮回。
 ```
-![image](https://user-images.githubusercontent.com/19854253/117416417-ef78a000-af4b-11eb-90bb-c49de8756d31.png)
-
-
-然后走代理就完事了。
-![image](https://user-images.githubusercontent.com/19854253/117416265-c1935b80-af4b-11eb-960d-9c4b73be1311.png)
+![image](https://user-images.githubusercontent.com/19854253/118811451-9dd2fc80-b8df-11eb-94b6-76cac791adae.png)

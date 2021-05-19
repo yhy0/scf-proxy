@@ -4,6 +4,7 @@ import (
 	"encoding/base64"
 	"flag"
 	"fmt"
+	"math/rand"
 	"net"
 	"net/http"
 	"net/http/httputil"
@@ -21,7 +22,7 @@ import (
 )
 
 var (
-	api  = flag.String("api", "", "API URL")
+	apis = make([]*url.URL, 0)
 	port = flag.Int("port", 8888, "listen http port")
 )
 
@@ -31,6 +32,14 @@ func init() {
 }
 
 func main() {
+	for _, s := range flag.Args() {
+		u, err := url.Parse(s)
+		if err != nil {
+			log.Fatal(err)
+		}
+		apis = append(apis, u)
+	}
+
 	p := martian.NewProxy()
 	defer p.Close()
 
@@ -67,12 +76,9 @@ func (T) ModifyRequest(req *http.Request) error {
 		return err
 	}
 
-	newReq, _ := http.NewRequest(http.MethodPost, *api, strings.NewReader(base64.StdEncoding.EncodeToString(b)))
-	u, err := url.Parse(*api)
-	if err != nil {
-		log.Fatal(err)
-	}
-	newReq.URL = u
+	api := apis[rand.Intn(len(apis))]
+	newReq, _ := http.NewRequest(http.MethodPost, api.String(), strings.NewReader(base64.StdEncoding.EncodeToString(b)))
+	newReq.URL = api
 	newReq.Header.Set("Url", req.URL.String())
 	*req = *newReq
 	return nil
