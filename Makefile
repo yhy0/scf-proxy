@@ -11,4 +11,4 @@ fmt:
 	go fmt ./...
 
 clean:
-	-rm server client
+	-rm server server.zip client
