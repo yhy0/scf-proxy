@@ -6,12 +6,13 @@ import (
 	"crypto/tls"
 	"encoding/base64"
 	"fmt"
-	"github.com/tencentyun/scf-go-lib/cloudfunction"
-	"github.com/tencentyun/scf-go-lib/events"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"time"
+
+	"github.com/tencentyun/scf-go-lib/cloudfunction"
+	"github.com/tencentyun/scf-go-lib/events"
 )
 
 func hello(event events.APIGatewayResponse) (*events.APIGatewayResponse, error) {

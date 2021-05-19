@@ -4,10 +4,6 @@ import (
 	"encoding/base64"
 	"flag"
 	"fmt"
-	"github.com/google/martian/v3"
-	martianLog "github.com/google/martian/v3/log"
-	"github.com/google/martian/v3/mitm"
-	log "github.com/sirupsen/logrus"
 	"net"
 	"net/http"
 	"net/http/httputil"
@@ -17,6 +13,11 @@ import (
 	"strings"
 	"syscall"
 	"time"
+
+	"github.com/google/martian/v3"
+	martianLog "github.com/google/martian/v3/log"
+	"github.com/google/martian/v3/mitm"
+	log "github.com/sirupsen/logrus"
 )
 
 var (
