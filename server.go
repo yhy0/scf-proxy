@@ -5,7 +5,6 @@ import (
 	"bytes"
 	"crypto/tls"
 	"encoding/base64"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -26,11 +25,12 @@ func hello(event events.APIGatewayResponse) (*events.APIGatewayResponse, error) 
 	}
 	req.RequestURI = ""
 	u, err := url.Parse(event.Headers["url"]) // url must lowercase
-	fmt.Println(event.Headers)
+
 	if err != nil {
 		return nil, err
 	}
 	req.URL = u
+
 	client := http.Client{
 		Transport: &http.Transport{
 			TLSClientConfig: &tls.Config{
@@ -40,6 +40,7 @@ func hello(event events.APIGatewayResponse) (*events.APIGatewayResponse, error) 
 		CheckRedirect: func(req *http.Request, via []*http.Request) error {
 			return http.ErrUseLastResponse
 		},
+
 		Timeout: 10 * time.Second,
 	}
 	resp, err := client.Do(req)

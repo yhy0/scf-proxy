@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"encoding/base64"
 	"flag"
 	"fmt"
@@ -21,18 +22,58 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+type Options struct {
+	Port    int
+	ApiFile string
+}
+
 var (
 	apis = make([]*url.URL, 0)
-	port = flag.Int("port", 8888, "listen http port")
+	o    = Options{}
 )
 
 func init() {
 	martianLog.SetLevel(martianLog.Error)
+
+	flag.IntVar(&o.Port, "port", 8888, "listen http port")
+	flag.StringVar(&o.ApiFile, "aF", "", "scf api file ")
+
 	flag.Parse()
 }
 
+func open(path string) (lines []string, Error error) {
+	file, err := os.Open(path)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	defer file.Close()
+
+	scanner := bufio.NewScanner(file)
+
+	for scanner.Scan() {
+		lines = append(lines, scanner.Text())
+	}
+
+	return lines, scanner.Err()
+}
+
 func main() {
-	for _, s := range flag.Args() {
+	var (
+		list []string
+		err  error
+	)
+
+	if o.ApiFile == "" {
+		list = flag.Args()
+	} else {
+		list, err = open(o.ApiFile)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+
+	for _, s := range list {
 		u, err := url.Parse(s)
 		if err != nil {
 			log.Fatal(err)
@@ -40,21 +81,29 @@ func main() {
 		apis = append(apis, u)
 	}
 
+	l, err := net.Listen("tcp", fmt.Sprintf("[::]:%d", o.Port))
+	if err != nil {
+		log.Fatalf("net.Listen(): got %v, want no error", err)
+	}
+
+	log.Infof("starting listen on %s", l.Addr().String())
+
 	p := martian.NewProxy()
 	defer p.Close()
 
-	ca, privateKey, _ := mitm.NewAuthority("name", "org", 24*365*time.Hour)
-	conf, _ := mitm.NewConfig(ca, privateKey)
-	p.SetMITM(conf)
+	p.SetTimeout(15 * time.Second)
 
-	//proxy, _ := url.Parse("http://localhost:8080")
-	//p.SetDownstreamProxy(proxy)
-
-	l, err := net.Listen("tcp", fmt.Sprintf("localhost:%d", *port))
+	// Test TLS server.
+	ca, priv, err := mitm.NewAuthority("martian.proxy", "Martian Authority", 24*365*time.Hour)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("mitm.NewAuthority(): got %v, want no error", err)
 	}
-	log.Infof("starting listen on %s", l.Addr().String())
+	mc, err := mitm.NewConfig(ca, priv)
+	if err != nil {
+		log.Fatalf("mitm.NewConfig(): got %v, want no error", err)
+	}
+
+	p.SetMITM(mc)
 
 	p.SetRequestModifier(new(T))
 
